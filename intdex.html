@@ -1,0 +1,392 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Habit Tracker Dashboard</title>
+
+<style>
+/* عام */
+body {
+  margin:0;
+  padding:0;
+  font-family:"Cairo",sans-serif;
+  background:#f4f7fb;
+  color:#111;
+  transition: background 0.3s, color 0.3s;
+}
+
+header {
+  background:#0ea5e9;
+  color:#fff;
+  padding:20px;
+  text-align:center;
+  font-size:26px;
+  font-weight:bold;
+}
+
+.container { width:90%; margin:30px auto; }
+
+.card {
+  background:#fff;
+  border-radius:16px;
+  padding:20px;
+  margin-bottom:25px;
+  box-shadow:0 4px 10px rgba(0,0,0,0.08);
+  transition: background 0.3s, color 0.3s;
+}
+
+h2 { margin-top:0; color:#333; }
+
+.add-box {
+  display:flex;
+  gap:10px;
+  margin-bottom:10px;
+}
+
+input[type="text"] {
+  flex:1;
+  padding:12px;
+  border-radius:10px;
+  border:1px solid #ccc;
+}
+
+button {
+  padding:12px 18px;
+  border:none;
+  border-radius:10px;
+  background:#0ea5e9;
+  color:#fff;
+  font-size:16px;
+  cursor:pointer;
+  transition: transform 0.2s;
+}
+
+button:hover { transform: scale(1.05); }
+
+/* زر الحذف */
+.delete-btn {
+  background:#000;
+  margin-bottom:15px;
+}
+
+/* الجدول */
+table {
+  width:100%;
+  border-collapse:collapse;
+  margin-top:20px;
+}
+
+th, td {
+  padding:12px;
+  border-bottom:1px solid #e0e0e0;
+  text-align:center;
+}
+
+th {
+  background:#e8f5ff;
+  color:#222;
+}
+
+/* Progress */
+.progress-bar {
+  width:100%;
+  height:12px;
+  background:#dbeafe;
+  border-radius:10px;
+}
+
+.progress-fill {
+  height:100%;
+  background:#0ea5e9;
+  width:0%;
+  border-radius:10px;
+  transition: width 0.3s;
+}
+
+/* الدائرة */
+.circle {
+  width:120px;
+  height:120px;
+  border-radius:50%;
+  border:10px solid #dbeafe;
+  border-top-color:#0ea5e9;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:20px;
+  font-weight:bold;
+  margin:auto;
+}
+
+/* صورة الأسبوع */
+.circle-week-img {
+  width:120px;
+  height:120px;
+  border-radius:50%;
+  overflow:hidden;
+  background: conic-gradient(#34d399 0deg, #dbeafe 0deg 360deg);
+  transition: transform 0.3s ease;
+  cursor:pointer;
+  margin:auto;
+}
+
+.circle-week-img:hover { transform: scale(1.15); }
+
+.circle-week-img img {
+  width:100%;
+  height:100%;
+  object-fit:cover;
+  border-radius:50%;
+}
+
+.footer-text {
+  text-align:center;
+  margin-top:8px;
+  font-weight:bold;
+  color:#0ea5e9;
+}
+
+footer {
+  text-align:center;
+  margin:40px 0 20px;
+  font-size:18px;
+  color:#0ea5e9;
+  font-weight:bold;
+}
+
+/* Dark Mode */
+body.dark {
+  background:#1f2937;
+  color:#f4f7fb;
+}
+
+body.dark .card {
+  background:#374151;
+  color:#f4f7fb;
+}
+
+body.dark th {
+  background:#16a34a;
+  color:#f4f7fb;
+}
+
+body.dark td {
+  background:#ffffff;
+  color:#111;
+}
+
+body.dark .progress-bar {
+  background:#e6f0dc;
+}
+
+body.dark .progress-fill {
+  background:#6b8e23;
+}
+
+body.dark footer,
+body.dark .footer-text {
+  color:#0ea5e9;
+}
+
+/* زر Dark Mode */
+#darkModeBtn {
+  font-size:20px;
+  background:none;
+  border:none;
+  cursor:pointer;
+  transition: transform 0.3s ease;
+}
+
+#darkModeBtn:hover {
+  transform: scale(1.2);
+}
+
+#darkModeBtn::before {
+  content:'☀️';
+  color:#facc15;
+}
+
+body.dark #darkModeBtn::before {
+  content:'🌙';
+}
+</style>
+</head>
+
+<body>
+
+<header>Daily activity with youssef 🚀</header>
+
+<div class="container">
+<div class="card">
+
+<h2>أضف عادة جديدة</h2>
+
+<div class="add-box">
+  <input type="text" id="habitInput" placeholder="اكتب اسم العادة هنا..." />
+  <button onclick="addHabit()">إضافة</button>
+  <button onclick="resetHabits()" style="background:#f87171;">Reset</button>
+  <button id="darkModeBtn" title="Toggle Dark Mode"></button>
+</div>
+
+<button class="delete-btn" onclick="deleteAllHabits()">حذف 🗑️</button>
+
+<table id="habitTable">
+<tr>
+  <th>العادة</th>
+  <th>السبت</th>
+  <th>الأحد</th>
+  <th>الاثنين</th>
+  <th>الثلاثاء</th>
+  <th>الأربعاء</th>
+  <th>الخميس</th>
+  <th>الجمعة</th>
+  <th>النسبة</th>
+</tr>
+</table>
+
+<h2>التقدم الكلي</h2>
+
+<div style="display:flex; gap:40px; justify-content:center; flex-wrap:wrap; align-items:center;">
+
+  <div class="circle" id="overallCircle">0%</div>
+
+  <div style="text-align:center;">
+    <div class="circle-week-img" id="weekCircle">
+      <img src="youssef.jpg" alt="Youssef">
+    </div>
+    <div class="footer-text">Dev.YoussefSaleh</div>
+  </div>
+
+  <table style="width:250px;">
+    <tr><th>اليوم</th><th>التقدم</th></tr>
+    <tr><td>السبت</td><td id="satP">0%</td></tr>
+    <tr><td>الأحد</td><td id="sunP">0%</td></tr>
+    <tr><td>الاثنين</td><td id="monP">0%</td></tr>
+    <tr><td>الثلاثاء</td><td id="tueP">0%</td></tr>
+    <tr><td>الأربعاء</td><td id="wedP">0%</td></tr>
+    <tr><td>الخميس</td><td id="thuP">0%</td></tr>
+    <tr><td>الجمعة</td><td id="friP">0%</td></tr>
+  </table>
+
+</div>
+</div>
+
+<div class="card">
+<h2 style="text-align:center">مخطط تقدم الأيام</h2>
+
+<div style="width:90%;margin:auto;">
+  <div>السبت <div class="progress-bar"><div id="satBar" class="progress-fill"></div></div></div>
+  <div>الأحد <div class="progress-bar"><div id="sunBar" class="progress-fill"></div></div></div>
+  <div>الاثنين <div class="progress-bar"><div id="monBar" class="progress-fill"></div></div></div>
+  <div>الثلاثاء <div class="progress-bar"><div id="tueBar" class="progress-fill"></div></div></div>
+  <div>الأربعاء <div class="progress-bar"><div id="wedBar" class="progress-fill"></div></div></div>
+  <div>الخميس <div class="progress-bar"><div id="thuBar" class="progress-fill"></div></div></div>
+  <div>الجمعة <div class="progress-bar"><div id="friBar" class="progress-fill"></div></div></div>
+</div>
+
+</div>
+</div>
+
+<footer>استمر ولا تتوقف! كل يوم خطوة 💪</footer>
+
+<script>
+darkModeBtn.onclick = () => document.body.classList.toggle("dark");
+
+/* LocalStorage */
+function saveData(){
+  let data=[];
+  document.querySelectorAll("#habitTable tr").forEach((r,i)=>{
+    if(i===0) return;
+    let obj={name:r.cells[0].innerText,days:[]};
+    for(let i=1;i<=7;i++) obj.days.push(r.cells[i].children[0].checked);
+    data.push(obj);
+  });
+  localStorage.setItem("habits",JSON.stringify(data));
+}
+
+function loadData(){
+  let data=JSON.parse(localStorage.getItem("habits")||"[]");
+  data.forEach(h=>{
+    let r=habitTable.insertRow();
+    r.insertCell().innerHTML=h.name;
+    h.days.forEach(d=>{
+      let c=r.insertCell();
+      let chk=document.createElement("input");
+      chk.type="checkbox";
+      chk.checked=d;
+      chk.onclick=()=>{updateProgress();saveData();}
+      c.appendChild(chk);
+    });
+    r.insertCell().innerHTML="0%";
+  });
+  updateProgress();
+}
+
+function addHabit(){
+  let v=habitInput.value.trim();
+  if(!v) return;
+  let r=habitTable.insertRow();
+  r.insertCell().innerHTML=v;
+  for(let i=0;i<7;i++){
+    let c=r.insertCell();
+    let chk=document.createElement("input");
+    chk.type="checkbox";
+    chk.onclick=()=>{updateProgress();saveData();}
+    c.appendChild(chk);
+  }
+  r.insertCell().innerHTML="0%";
+  habitInput.value="";
+  saveData();
+  updateProgress();
+}
+
+function resetHabits(){
+  document.querySelectorAll("#habitTable input").forEach(c=>c.checked=false);
+  saveData();
+  updateProgress();
+}
+
+function deleteAllHabits(){
+  if(!confirm("تأكيد حذف كل العادات؟")) return;
+  while(habitTable.rows.length>1) habitTable.deleteRow(1);
+  localStorage.removeItem("habits");
+  updateProgress();
+}
+
+function updateProgress(){
+  let total=0,done=0;
+  const dayTotals=[0,0,0,0,0,0,0];
+  const dayChecks=[0,0,0,0,0,0,0];
+
+  document.querySelectorAll("#habitTable tr").forEach((r,i)=>{
+    if(i===0) return;
+    let count=0;
+    for(let c=1;c<=7;c++){
+      dayTotals[c-1]++;
+      if(r.cells[c].children[0].checked){
+        done++; count++; dayChecks[c-1]++;
+      }
+      total++;
+    }
+    r.cells[8].innerHTML=((count/7)*100).toFixed(1)+"%";
+  });
+
+  let p=((done/total)*100)||0;
+  overallCircle.innerHTML=p.toFixed(1)+"%";
+  weekCircle.style.background =
+    `conic-gradient(#34d399 0deg ${p*3.6}deg, #dbeafe ${p*3.6}deg 360deg)`;
+
+  const ids=["sat","sun","mon","tue","wed","thu","fri"];
+  ids.forEach((d,i)=>{
+    let percent=((dayChecks[i]/dayTotals[i])*100)||0;
+    document.getElementById(d+"P").innerText=percent.toFixed(1)+"%";
+    document.getElementById(d+"Bar").style.width=percent+"%";
+  });
+}
+
+loadData();
+</script>
+
+</body>
+</html>
